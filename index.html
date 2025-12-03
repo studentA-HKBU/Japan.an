@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>japan note — 詞 / 文型 學習</title>
 <style>
-  :root{--bg:#0f2940;--card:#163b5a;--ink:#f2f6fb;--muted:#b7c6d9;--accent:#6dd19f;--accent2:#ffd166}
+  :root{--bg:#0f2940;--card:#163b5a;--ink:#f2f6fb;--muted:#b7c6d9;--accent:#6dd19f}
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--ink)}
   header{padding:14px 16px;border-bottom:1px solid #1e4b72;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -34,8 +34,7 @@
   .hidden{display:none}
   /* Flashcards */
   .fc-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;margin:12px 0}
-  .fc-card{width:min(680px,95%);min-height:170px;background:var(--card);border:1px solid #2a5a8a;border-radius:16px;
-           padding:18px;text-align:center;display:flex;flex-direction:column;justify-content:center}
+  .fc-card{width:min(680px,95%);min-height:170px;background:var(--card);border:1px solid #2a5a8a;border-radius:16px;padding:18px;text-align:center;display:flex;flex-direction:column;justify-content:center}
   .fc-jp{font-size:28px;margin:6px 0}
   .fc-sub{color:#c5e8d7}
   .fc-cn{color:#d0d7e6;margin-top:8px}
@@ -101,12 +100,11 @@
   </section>
 </main>
 
-<footer>語音朗讀依賴瀏覽器 Web Speech API。iOS 需要使用者點擊後才可發聲。</footer>
+<footer>語音朗讀依賴瀏覽器 Web Speech API。iOS 若無聲音，請先點「啟用語音」或任意朗讀按鈕。</footer>
 
 <script>
 /* ========= DATA: Lessons 1–6 (JP + romaji + 繁體中文) ========= */
 const WORDS = [
-  // L1 People / Titles / Countries / Orgs / Age
   {id:'w1',lesson:'L1',jp:'わたし',romaji:'watashi',cn:'我',tag:'pronoun'},
   {id:'w2',lesson:'L1',jp:'あなた',romaji:'anata',cn:'你',tag:'pronoun'},
   {id:'w3',lesson:'L1',jp:'あのひと（あのかた）',romaji:'ano hito (ano kata)',cn:'那個人（那位）',tag:'pronoun'},
@@ -149,7 +147,6 @@ const WORDS = [
   {id:'w40',lesson:'L1',jp:'さくら大学',romaji:'sakura daigaku',cn:'櫻花大學',tag:'org'},
   {id:'w41',lesson:'L1',jp:'富士大学',romaji:'fuji daigaku',cn:'富士大學',tag:'org'},
 
-  // L2 Objects, demonstratives, の
   {id:'w42',lesson:'L2',jp:'これ／それ／あれ／どれ',romaji:'kore / sore / are / dore',cn:'這／那／那邊那個／哪一個',tag:'demo'},
   {id:'w43',lesson:'L2',jp:'この／その／あの',romaji:'kono / sono / ano',cn:'這／那／那邊的（連體）',tag:'demo'},
   {id:'w44',lesson:'L2',jp:'ほん（本）',romaji:'hon',cn:'書',tag:'thing'},
@@ -187,7 +184,6 @@ const WORDS = [
   {id:'w76',lesson:'L2',jp:'これから おせわに なります',romaji:'kore kara osewa ni narimasu',cn:'今後請多關照',tag:'phrase'},
   {id:'w77',lesson:'L2',jp:'こちらこそ よろしく',romaji:'kochira koso yoroshiku',cn:'彼此彼此，請多關照',tag:'phrase'},
 
-  // L3 Places, floors, prices, shop phrases
   {id:'w78',lesson:'L3',jp:'ここ／そこ／あそこ／どこ',romaji:'koko / soko / asoko / doko',cn:'這裡／那裡／那邊／哪裡',tag:'place'},
   {id:'w79',lesson:'L3',jp:'こちら／そちら／あちら／どちら',romaji:'kochira / sochira / achira / dochira',cn:'這邊／那邊／那邊（敬）／哪邊（敬）',tag:'place'},
   {id:'w80',lesson:'L3',jp:'きょうしつ（教室）',romaji:'kyōshitsu',cn:'教室',tag:'place'},
@@ -226,7 +222,6 @@ const WORDS = [
   {id:'w113',lesson:'L3',jp:'ジャカルタ／バンコク／ベルリン',romaji:'Jakaruta / Bankoku / Berurin',cn:'雅加達／曼谷／柏林',tag:'place'},
   {id:'w114',lesson:'L3',jp:'しんおおさか（新大阪）',romaji:'Shin-Ōsaka',cn:'新大阪',tag:'place'},
 
-  // L4 Time, days, schedules
   {id:'w115',lesson:'L4',jp:'おきます',romaji:'okimasu',cn:'起床',tag:'verb'},
   {id:'w116',lesson:'L4',jp:'ねます',romaji:'nemasu',cn:'睡覺',tag:'verb'},
   {id:'w117',lesson:'L4',jp:'はたらきます',romaji:'hatarakimasu',cn:'工作',tag:'verb'},
@@ -256,7 +251,6 @@ const WORDS = [
   {id:'w141',lesson:'L4',jp:'こうしえん（甲子園）',romaji:'Kōshien',cn:'甲子園',tag:'place'},
   {id:'w142',lesson:'L4',jp:'おおさかじょう（大阪城）',romaji:'Ōsaka-jō',cn:'大阪城',tag:'place'},
 
-  // L5 Movement, transport, weeks/months/years, dates
   {id:'w143',lesson:'L5',jp:'いきます',romaji:'ikimasu',cn:'去',tag:'verb'},
   {id:'w144',lesson:'L5',jp:'きます',romaji:'kimasu',cn:'來',tag:'verb'},
   {id:'w145',lesson:'L5',jp:'かえります',romaji:'kaerimasu',cn:'回',tag:'verb'},
@@ -282,7 +276,6 @@ const WORDS = [
   {id:'w165',lesson:'L5',jp:'そうですね／ありがとうございました',romaji:'sō desu ne / arigatō gozaimashita',cn:'是啊／非常感謝（過去）',tag:'phrase'},
   {id:'w166',lesson:'L5',jp:'こうしえん／おおさかじょう',romaji:'Kōshien / Ōsaka-jō',cn:'甲子園／大阪城',tag:'place'},
 
-  // L6 Actions, food/drink, activities, adverbs
   {id:'w167',lesson:'L6',jp:'たべます',romaji:'tabemasu',cn:'吃',tag:'verb'},
   {id:'w168',lesson:'L6',jp:'のみます',romaji:'nomimasu',cn:'喝',tag:'verb'},
   {id:'w169',lesson:'L6',jp:'みます',romaji:'mimasu',cn:'看',tag:'verb'},
@@ -306,29 +299,23 @@ const WORDS = [
 ];
 
 const PATTERNS = [
-  // L1
   {id:'p1',lesson:'L1',title:'A は B です',jp:'わたしは 学生です。',romaji:'watashi wa gakusei desu.',cn:'我是學生。'},
   {id:'p2',lesson:'L1',title:'否定：A は B じゃ（では）ありません',jp:'サントスさんは 学生じゃありません。',romaji:'... ja (de wa) arimasen',cn:'桑托斯不是學生。'},
   {id:'p3',lesson:'L1',title:'疑問：…ですか',jp:'ミラーさんは 会社員ですか。',romaji:'... desu ka?',cn:'米勒是公司職員嗎？'},
   {id:'p4',lesson:'L1',title:'也：A も B です',jp:'サントスさんも 会社員です。',romaji:'... mo ... desu',cn:'…也…'},
   {id:'p5',lesson:'L1',title:'來自…：～から 来ました',jp:'タイから 来ました。',romaji:'tai kara kimashita',cn:'從泰國來。'},
-  // L2
   {id:'p6',lesson:'L2',title:'指示詞（物）',jp:'これは 辞書です。／この 本は～',romaji:'kore / sore / are / dore; kono / sono / ano',cn:'這／那；這本～'},
   {id:'p7',lesson:'L2',title:'所屬／性質の「の」',jp:'これは 日本の 車です。',romaji:'nihon no kuruma',cn:'這是日本的車。'},
   {id:'p8',lesson:'L2',title:'「の」省略',jp:'これは わたしのです。',romaji:'watashi no desu',cn:'這是我的。'},
-  // L3
   {id:'p9',lesson:'L3',title:'場所指示',jp:'ここ／そこ／あそこ／どこ',romaji:'koko / soko / asoko / doko',cn:'這裡／那裡／哪裡'},
   {id:'p10',lesson:'L3',title:'場所名 + は + ここ/そこ/あそこ です',jp:'エレベーターは あそこです。',romaji:'erebētā wa asoko desu',cn:'電梯在那邊。'},
   {id:'p11',lesson:'L3',title:'詢價',jp:'これは いくらですか。',romaji:'ikura desu ka?',cn:'這個多少錢？'},
-  // L4
   {id:'p12',lesson:'L4',title:'時間 + に + V',jp:'6時に 起きます。',romaji:'roku-ji ni okimasu',cn:'六點起床。'},
   {id:'p13',lesson:'L4',title:'從…到…',jp:'9時から 5時まで 働きます。',romaji:'9ji kara 5ji made hatarakimasu',cn:'從9點到5點工作。'},
   {id:'p14',lesson:'L4',title:'動詞禮貌形',jp:'ます／ません／ました／ませんでした',romaji:'masu conjugation',cn:'非過去／否定／過去／過去否定'},
-  // L5
   {id:'p15',lesson:'L5',title:'方向：～へ／～に',jp:'京都へ 行きます。',romaji:'kyōto e ikimasu',cn:'去京都。'},
   {id:'p16',lesson:'L5',title:'手段：～で',jp:'タクシーで 帰ります。',romaji:'takushī de kaerimasu',cn:'乘計程車回去。'},
-  {id:'p17',lesson:'L5',title:'與…一起：～と',jp:'家族と 日本へ 来ました。',romaji:'kazoku to ... kimashita',cn:'和家人一來日本。'},
-  // L6
+  {id:'p17',lesson:'L5',title:'與…一起：～と',jp:'家族と 日本へ 来ました。',romaji:'kazoku to ... kimashita',cn:'和家人一起來日本。'},
   {id:'p18',lesson:'L6',title:'賓語：N を V',jp:'パンを 食べます。',romaji:'pan o tabemasu',cn:'吃麵包。'},
   {id:'p19',lesson:'L6',title:'地點で + V',jp:'駅で 新聞を 買います。',romaji:'eki de shinbun o kaimasu',cn:'在車站買報紙。'},
   {id:'p20',lesson:'L6',title:'邀請：～ませんか',jp:'いっしょに 行きませんか。',romaji:'issho ni ikimasen ka',cn:'一起去好嗎？'},
@@ -336,24 +323,49 @@ const PATTERNS = [
 ];
 
 /* ========= STATE ========= */
-let currentTab = 'words'; // 'words' | 'patterns'
+let currentTab = 'words';
 let showRomaji = true, showChinese = true;
-let mode = 'list'; // 'list' | 'flash'
-let deck = JSON.parse(localStorage.getItem('jn_deck')||'[]'); // array of item ids
+let mode = 'list';
+let deck = JSON.parse(localStorage.getItem('jn_deck')||'[]');
 const $ = s=>document.querySelector(s);
 
-/* ========= HELPERS ========= */
+/* ========= iOS‑friendly TTS ========= */
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+let voices = [];
+function loadVoices(){ voices = window.speechSynthesis.getVoices(); }
+window.speechSynthesis.onvoiceschanged = loadVoices; loadVoices();
+
+function pickVoice(lang){
+  if(!voices.length) loadVoices();
+  let v = voices.find(x=>x.lang===lang);
+  if(v) return v;
+  v = voices.find(x=>x.lang && x.lang.toLowerCase().startsWith(lang.split('-')[0]));
+  if(v) return v;
+  const nameHints = {
+    'ja-JP': ['Kyoko','Otoya','ja-JP','ja'],
+    'zh-TW': ['Mei-Jia','zh-TW','zh-Hant','zh'],
+    'zh-HK': ['Sin-Ji','zh-HK','yue','zh']
+  };
+  const hints = nameHints[lang]||[];
+  for(const hint of hints){
+    v = voices.find(x=>(x.name && x.name.includes(hint))||(x.lang && x.lang.includes(hint)));
+    if(v) return v;
+  }
+  return null;
+}
+
 function speak(text, lang='ja-JP'){
-  if(!('speechSynthesis' in window)){ alert('此瀏覽器不支援語音朗讀'); return;}
+  if(!('speechSynthesis' in window)){ alert('此瀏覽器不支援語音朗讀'); return; }
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = lang; u.rate = 1; u.pitch = 1; u.volume = 1;
-  window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+  const voice = pickVoice(lang);
+  if(voice){ u.voice=voice; u.lang=voice.lang; } else { u.lang=lang; }
+  u.rate=1; u.pitch=1; u.volume=1;
+  window.speechSynthesis.speak(u);
 }
+
+/* ========= HELPERS ========= */
 function saveDeck(){ localStorage.setItem('jn_deck', JSON.stringify(deck)); }
-function lessonSelected(lesson, sel){
-  if(sel.includes('all')) return true;
-  return sel.includes(lesson);
-}
+function lessonSelected(lesson, sel){ if(sel.includes('all')) return true; return sel.includes(lesson); }
 function filterItems(list){
   const q = $('#searchBox').value.trim().toLowerCase();
   const sel = [...document.querySelector('#lessonFilter').selectedOptions].map(o=>o.value);
@@ -372,8 +384,7 @@ function renderList(){
   badgeCount(filtered.length);
   const wrap = document.querySelector('#listView'); wrap.innerHTML='';
   filtered.forEach(it=>{
-    const card = document.createElement('div');
-    card.className='card';
+    const card = document.createElement('div'); card.className='card';
     card.innerHTML = `
       <div class="badge">${it.lesson}</div>
       <div class="jp">${it.jp}</div>
@@ -384,8 +395,7 @@ function renderList(){
         <button class="speakJP">讀日文</button>
         <button class="speakCN">讀中文</button>
         <button class="solid addDeck">${deck.includes(it.id)?'已在牌組':'加入牌組'}</button>
-      </div>
-    `;
+      </div>`;
     card.querySelector('.speakJP').onclick=()=>speak(it.jp,'ja-JP');
     card.querySelector('.speakCN').onclick=()=>speak(it.cn||it.jp,'zh-TW');
     card.querySelector('.addDeck').onclick=()=>{
@@ -449,8 +459,25 @@ document.addEventListener('keydown',(e)=>{
   if(e.key==='ArrowRight'){ document.querySelector('#fcGood').click(); }
 });
 
+/* Add iOS “Enable Audio” button to unlock voices */
+document.addEventListener('DOMContentLoaded', () => {
+  if (isIOS) {
+    const toolbar = document.querySelector('.toolbar') || document.body;
+    const btn = document.createElement('button');
+    btn.id = 'enableAudio';
+    btn.className = 'primary';
+    btn.textContent = '啟用語音';
+    toolbar.prepend(btn);
+    btn.onclick = () => {
+      speak('テスト', 'ja-JP');
+      setTimeout(loadVoices, 300);
+      alert('語音已啟用。之後可點「讀日文／讀中文」。');
+      btn.remove();
+    };
+  }
+});
+
 renderList();
 </script>
 </body>
-
 </html>
