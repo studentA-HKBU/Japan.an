@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>japan note — 詞 / 文型 學習</title>
+<style>
+  :root{--bg:#0f2940;--card:#163b5a;--ink:#f2f6fb;--muted:#b7c6d9;--accent:#6dd19f;--accent2:#ffd166}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--ink)}
+  header{padding:14px 16px;border-bottom:1px solid #1e4b72;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  header h1{margin:0;font-size:18px;font-weight:700}
+  .tab{display:inline-flex;gap:8px;background:#103251;border:1px solid #1e4b72;border-radius:10px;padding:4px}
+  .tab button{background:transparent;border:0;color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer}
+  .tab button.active{background:var(--accent);color:#07302b;font-weight:700}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-left:auto}
+  .controls input,.controls select{background:#112e4a;border:1px solid #26537f;color:var(--ink);padding:8px;border-radius:8px}
+  .tog{display:flex;gap:10px;align-items:center}
+  .tog label{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+  main{max-width:1100px;margin:0 auto;padding:14px}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+  .toolbar button{background:#194b75;border:1px solid #2d6aa3;color:var(--ink);padding:8px 12px;border-radius:8px;cursor:pointer}
+  .toolbar button.primary{background:var(--accent);color:#063023;font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid #224e7b;border-radius:12px;padding:12px}
+  .jp{font-size:20px;line-height:1.4;margin-bottom:6px}
+  .romaji{color:#bfe0cc;font-size:13px}
+  .cn{color:var(--muted);font-size:14px}
+  .meta{color:#98b2c9;font-size:12px;margin-top:6px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .row button{background:#1c4e7b;border:1px solid #2d6aa3;color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer}
+  .row button.solid{background:#2f7a5e;border-color:#2f7a5e}
+  .badge{display:inline-block;background:#214a73;color:#c7dbf3;border:1px solid #2f69a0;padding:1px 6px;border-radius:999px;font-size:11px}
+  .hidden{display:none}
+  /* Flashcards */
+  .fc-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;margin:12px 0}
+  .fc-card{width:min(680px,95%);min-height:170px;background:var(--card);border:1px solid #2a5a8a;border-radius:16px;
+           padding:18px;text-align:center;display:flex;flex-direction:column;justify-content:center}
+  .fc-jp{font-size:28px;margin:6px 0}
+  .fc-sub{color:#c5e8d7}
+  .fc-cn{color:#d0d7e6;margin-top:8px}
+  .fc-actions{display:flex;gap:10px}
+  .pill{background:#13385a;border:1px solid #2a5a8a;color:#eaf1f8;padding:10px 14px;border-radius:999px;cursor:pointer}
+  .pill.good{background:#38a169;border-color:#38a169;color:#042416}
+  .pill.again{background:#ef4444;border-color:#ef4444;color:#2d0a0a}
+  .muted{color:var(--muted)}
+  footer{padding:16px;text-align:center;color:#9fb4c9}
+</style>
+</head>
+<body>
+<header>
+  <h1>japan note</h1>
+  <div class="tab">
+    <button id="tabWords" class="active">詞（Vocabulary）</button>
+    <button id="tabPatterns">文型（Grammar）</button>
+  </div>
+  <div class="controls">
+    <input id="searchBox" placeholder="搜尋（日／羅馬音／中文）" />
+    <select id="lessonFilter" multiple size="1" title="按課篩選">
+      <option value="all" selected>全部課次</option>
+      <option>L1</option><option>L2</option><option>L3</option>
+      <option>L4</option><option>L5</option><option>L6</option>
+    </select>
+    <div class="tog">
+      <label><input type="checkbox" id="showRomaji" checked>羅馬音</label>
+      <label><input type="checkbox" id="showChinese" checked>中文</label>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button id="modeList" class="primary">清單模式</button>
+    <button id="modeFlash">閃卡模式</button>
+    <span class="badge" id="countBadge">0 項</span>
+    <button id="btnAddFiltered">把篩選結果加入牌組</button>
+    <button id="btnClearDeck">清空牌組</button>
+  </div>
+
+  <section id="listView" class="grid"></section>
+
+  <section id="flashView" class="hidden">
+    <div class="fc-wrap">
+      <div class="meta" id="deckInfo">牌組：0 張 | 進度自動保存（本地）</div>
+      <div class="fc-card" id="fcCard">
+        <div class="badge" id="fcLesson">L?</div>
+        <div class="fc-jp" id="fcJP">—</div>
+        <div class="fc-sub" id="fcRomaji">—</div>
+        <div class="fc-cn" id="fcCN">—</div>
+      </div>
+      <div class="fc-actions">
+        <button class="pill" id="fcSpeakJP">讀日文</button>
+        <button class="pill" id="fcSpeakCN">讀中文</button>
+        <button class="pill" id="fcFlip">翻面／隱藏</button>
+        <button class="pill again" id="fcAgain">再來一次</button>
+        <button class="pill good" id="fcGood">認識了</button>
+        <button class="pill" id="fcRemove">移出牌組</button>
+      </div>
+      <div class="muted" id="fcHint">提示：上下方向鍵＝再來／認識；空白鍵＝翻面</div>
+    </div>
+  </section>
+</main>
+
+<footer>語音朗讀依賴瀏覽器 Web Speech API。iOS 需要使用者點擊後才可發聲。</footer>
+
+<script>
+/* ========= DATA: Lessons 1–6 (JP + romaji + 繁體中文) ========= */
+const WORDS = [
+  // L1 People / Titles / Countries / Orgs / Age
+  {id:'w1',lesson:'L1',jp:'わたし',romaji:'watashi',cn:'我',tag:'pronoun'},
+  {id:'w2',lesson:'L1',jp:'あなた',romaji:'anata',cn:'你',tag:'pronoun'},
+  {id:'w3',lesson:'L1',jp:'あのひと（あのかた）',romaji:'ano hito (ano kata)',cn:'那個人（那位）',tag:'pronoun'},
+  {id:'w4',lesson:'L1',jp:'～さん',romaji:'~ san',cn:'先生／女士',tag:'suffix'},
+  {id:'w5',lesson:'L1',jp:'～ちゃん',romaji:'~ chan',cn:'小～（親暱）',tag:'suffix'},
+  {id:'w6',lesson:'L1',jp:'～くん',romaji:'~ kun',cn:'～君（男性後輩）',tag:'suffix'},
+  {id:'w7',lesson:'L1',jp:'せんせい',romaji:'sensei',cn:'老師（稱呼）',tag:'job'},
+  {id:'w8',lesson:'L1',jp:'きょうし',romaji:'kyōshi',cn:'教師（職業）',tag:'job'},
+  {id:'w9',lesson:'L1',jp:'がくせい',romaji:'gakusei',cn:'學生',tag:'job'},
+  {id:'w10',lesson:'L1',jp:'かいしゃいん',romaji:'kaishain',cn:'公司職員',tag:'job'},
+  {id:'w11',lesson:'L1',jp:'（IMC の）しゃいん',romaji:'IMC no shain',cn:'（IMC 的）職員',tag:'job'},
+  {id:'w12',lesson:'L1',jp:'ぎんこういん',romaji:'ginkōin',cn:'銀行職員',tag:'job'},
+  {id:'w13',lesson:'L1',jp:'いしゃ',romaji:'isha',cn:'醫生',tag:'job'},
+  {id:'w14',lesson:'L1',jp:'けんきゅうしゃ',romaji:'kenkyūsha',cn:'研究員',tag:'job'},
+  {id:'w15',lesson:'L1',jp:'だいがく',romaji:'daigaku',cn:'大學',tag:'place'},
+  {id:'w16',lesson:'L1',jp:'びょういん',romaji:'byōin',cn:'醫院',tag:'place'},
+  {id:'w17',lesson:'L1',jp:'だれ（どなた）',romaji:'dare (donata)',cn:'誰（哪位）',tag:'q'},
+  {id:'w18',lesson:'L1',jp:'～さい',romaji:'~ sai',cn:'～歲',tag:'age'},
+  {id:'w19',lesson:'L1',jp:'おいくつ',romaji:'o-ikutsu',cn:'幾歲／多大（敬）',tag:'age'},
+  {id:'w20',lesson:'L1',jp:'はい／いいえ',romaji:'hai / iie',cn:'是／不是',tag:'response'},
+  {id:'w21',lesson:'L1',jp:'はじめまして',romaji:'hajimemashite',cn:'初次見面',tag:'phrase'},
+  {id:'w22',lesson:'L1',jp:'～から 来ました',romaji:'~ kara kimashita',cn:'我從～來',tag:'phrase'},
+  {id:'w23',lesson:'L1',jp:'どうぞ よろしく おねがいします',romaji:'dōzo yoroshiku onegai shimasu',cn:'請多關照',tag:'phrase'},
+  {id:'w24',lesson:'L1',jp:'しつれいですが／おなまえは',romaji:'shitsurei desu ga / onamae wa',cn:'失禮了，您貴姓？',tag:'phrase'},
+  {id:'w25',lesson:'L1',jp:'こちらは ～さんです',romaji:'kochira wa ~-san desu',cn:'這位是～',tag:'phrase'},
+  {id:'w26',lesson:'L1',jp:'アメリカ',romaji:'amerika',cn:'美國',tag:'country'},
+  {id:'w27',lesson:'L1',jp:'イギリス',romaji:'igirisu',cn:'英國',tag:'country'},
+  {id:'w28',lesson:'L1',jp:'インド',romaji:'indo',cn:'印度',tag:'country'},
+  {id:'w29',lesson:'L1',jp:'インドネシア',romaji:'indoneshia',cn:'印度尼西亞',tag:'country'},
+  {id:'w30',lesson:'L1',jp:'かんこく',romaji:'kankoku',cn:'韓國',tag:'country'},
+  {id:'w31',lesson:'L1',jp:'タイ',romaji:'tai',cn:'泰國',tag:'country'},
+  {id:'w32',lesson:'L1',jp:'ちゅうごく',romaji:'chūgoku',cn:'中國',tag:'country'},
+  {id:'w33',lesson:'L1',jp:'ドイツ',romaji:'doitsu',cn:'德國',tag:'country'},
+  {id:'w34',lesson:'L1',jp:'にほん',romaji:'nihon',cn:'日本',tag:'country'},
+  {id:'w35',lesson:'L1',jp:'IMC',romaji:'aimushī',cn:'IMC 公司',tag:'org'},
+  {id:'w36',lesson:'L1',jp:'パワーでんき',romaji:'pawā denki',cn:'動力電氣公司',tag:'org'},
+  {id:'w37',lesson:'L1',jp:'ブラジルエアー',romaji:'burajiru eā',cn:'巴西航空公司',tag:'org'},
+  {id:'w38',lesson:'L1',jp:'AKC 研究センター',romaji:'AKC kenkyū sentā',cn:'AKC 研究中心',tag:'org'},
+  {id:'w39',lesson:'L1',jp:'神戸病院',romaji:'kōbe byōin',cn:'神戶醫院',tag:'org'},
+  {id:'w40',lesson:'L1',jp:'さくら大学',romaji:'sakura daigaku',cn:'櫻花大學',tag:'org'},
+  {id:'w41',lesson:'L1',jp:'富士大学',romaji:'fuji daigaku',cn:'富士大學',tag:'org'},
+
+  // L2 Objects, demonstratives, の
+  {id:'w42',lesson:'L2',jp:'これ／それ／あれ／どれ',romaji:'kore / sore / are / dore',cn:'這／那／那邊那個／哪一個',tag:'demo'},
+  {id:'w43',lesson:'L2',jp:'この／その／あの',romaji:'kono / sono / ano',cn:'這／那／那邊的（連體）',tag:'demo'},
+  {id:'w44',lesson:'L2',jp:'ほん（本）',romaji:'hon',cn:'書',tag:'thing'},
+  {id:'w45',lesson:'L2',jp:'じしょ（辞書）',romaji:'jisho',cn:'詞典',tag:'thing'},
+  {id:'w46',lesson:'L2',jp:'ざっし（雑誌）',romaji:'zasshi',cn:'雜誌',tag:'thing'},
+  {id:'w47',lesson:'L2',jp:'しんぶん（新聞）',romaji:'shinbun',cn:'報紙',tag:'thing'},
+  {id:'w48',lesson:'L2',jp:'ノート',romaji:'nōto',cn:'筆記本',tag:'thing'},
+  {id:'w49',lesson:'L2',jp:'てちょう（手帳）',romaji:'techō',cn:'手冊',tag:'thing'},
+  {id:'w50',lesson:'L2',jp:'めいし（名刺）',romaji:'meishi',cn:'名片',tag:'thing'},
+  {id:'w51',lesson:'L2',jp:'カード',romaji:'kādo',cn:'卡',tag:'thing'},
+  {id:'w52',lesson:'L2',jp:'えんぴつ',romaji:'enpitsu',cn:'鉛筆',tag:'thing'},
+  {id:'w53',lesson:'L2',jp:'ボールペン',romaji:'bōrupen',cn:'圓珠筆',tag:'thing'},
+  {id:'w54',lesson:'L2',jp:'シャープペンシル',romaji:'shāpu penshiru',cn:'自動鉛筆',tag:'thing'},
+  {id:'w55',lesson:'L2',jp:'かぎ',romaji:'kagi',cn:'鑰匙',tag:'thing'},
+  {id:'w56',lesson:'L2',jp:'とけい（時計）',romaji:'tokei',cn:'錶／鐘',tag:'thing'},
+  {id:'w57',lesson:'L2',jp:'かさ',romaji:'kasa',cn:'傘',tag:'thing'},
+  {id:'w58',lesson:'L2',jp:'かばん',romaji:'kaban',cn:'包',tag:'thing'},
+  {id:'w59',lesson:'L2',jp:'CD／シーディー',romaji:'shīdī',cn:'CD',tag:'thing'},
+  {id:'w60',lesson:'L2',jp:'テレビ',romaji:'terebi',cn:'電視',tag:'thing'},
+  {id:'w61',lesson:'L2',jp:'ラジオ',romaji:'rajio',cn:'收音機',tag:'thing'},
+  {id:'w62',lesson:'L2',jp:'カメラ',romaji:'kamera',cn:'相機',tag:'thing'},
+  {id:'w63',lesson:'L2',jp:'コンピューター',romaji:'konpyūtā',cn:'電腦',tag:'thing'},
+  {id:'w64',lesson:'L2',jp:'くるま（車）',romaji:'kuruma',cn:'車',tag:'thing'},
+  {id:'w65',lesson:'L2',jp:'つくえ（机）',romaji:'tsukue',cn:'桌子',tag:'thing'},
+  {id:'w66',lesson:'L2',jp:'いす（椅子）',romaji:'isu',cn:'椅子',tag:'thing'},
+  {id:'w67',lesson:'L2',jp:'チョコレート',romaji:'chokorēto',cn:'巧克力',tag:'food'},
+  {id:'w68',lesson:'L2',jp:'コーヒー',romaji:'kōhī',cn:'咖啡',tag:'drink'},
+  {id:'w69',lesson:'L2',jp:'［お］みやげ（お土産）',romaji:'omiyage',cn:'伴手禮／土特產',tag:'thing'},
+  {id:'w70',lesson:'L2',jp:'えいご（英語）',romaji:'eigo',cn:'英語',tag:'lang'},
+  {id:'w71',lesson:'L2',jp:'にほんご（日本語）',romaji:'nihongo',cn:'日語',tag:'lang'},
+  {id:'w72',lesson:'L2',jp:'～ご（～語）',romaji:'~ go',cn:'～語言',tag:'lang'},
+  {id:'w73',lesson:'L2',jp:'あのう／えっ／どうぞ／どうも',romaji:'anō / e / dōzo / dōmo',cn:'那個…／咦／請／謝謝',tag:'phrase'},
+  {id:'w74',lesson:'L2',jp:'ありがとう（ございます）',romaji:'arigatō (gozaimasu)',cn:'謝謝（正式）',tag:'phrase'},
+  {id:'w75',lesson:'L2',jp:'そうですか／ちがいます／あっ',romaji:'sō desu ka / chigaimasu / a',cn:'這樣啊／不對／啊',tag:'phrase'},
+  {id:'w76',lesson:'L2',jp:'これから おせわに なります',romaji:'kore kara osewa ni narimasu',cn:'今後請多關照',tag:'phrase'},
+  {id:'w77',lesson:'L2',jp:'こちらこそ よろしく',romaji:'kochira koso yoroshiku',cn:'彼此彼此，請多關照',tag:'phrase'},
+
+  // L3 Places, floors, prices, shop phrases
+  {id:'w78',lesson:'L3',jp:'ここ／そこ／あそこ／どこ',romaji:'koko / soko / asoko / doko',cn:'這裡／那裡／那邊／哪裡',tag:'place'},
+  {id:'w79',lesson:'L3',jp:'こちら／そちら／あちら／どちら',romaji:'kochira / sochira / achira / dochira',cn:'這邊／那邊／那邊（敬）／哪邊（敬）',tag:'place'},
+  {id:'w80',lesson:'L3',jp:'きょうしつ（教室）',romaji:'kyōshitsu',cn:'教室',tag:'place'},
+  {id:'w81',lesson:'L3',jp:'しょくどう（食堂）',romaji:'shokudō',cn:'食堂',tag:'place'},
+  {id:'w82',lesson:'L3',jp:'じむしょ（事務所）',romaji:'jimusho',cn:'辦公室',tag:'place'},
+  {id:'w83',lesson:'L3',jp:'かいぎしつ（会議室）',romaji:'kaigishitsu',cn:'會議室',tag:'place'},
+  {id:'w84',lesson:'L3',jp:'うけつけ（受付）',romaji:'uketsuke',cn:'接待處',tag:'place'},
+  {id:'w85',lesson:'L3',jp:'ロビー',romaji:'robī',cn:'大廳',tag:'place'},
+  {id:'w86',lesson:'L3',jp:'へや（部屋）',romaji:'heya',cn:'房間',tag:'place'},
+  {id:'w87',lesson:'L3',jp:'トイレ（おてあらい）',romaji:'toire (otearai)',cn:'廁所（洗手間）',tag:'place'},
+  {id:'w88',lesson:'L3',jp:'かいだん（階段）',romaji:'kaidan',cn:'樓梯',tag:'place'},
+  {id:'w89',lesson:'L3',jp:'エレベーター',romaji:'erebētā',cn:'電梯',tag:'place'},
+  {id:'w90',lesson:'L3',jp:'エスカレーター',romaji:'esukarētā',cn:'自動扶梯',tag:'place'},
+  {id:'w91',lesson:'L3',jp:'じどうはんばいき（自動販売機）',romaji:'jidō hanbaiki',cn:'自動販賣機',tag:'place'},
+  {id:'w92',lesson:'L3',jp:'でんわ（電話）',romaji:'denwa',cn:'電話',tag:'place'},
+  {id:'w93',lesson:'L3',jp:'くに（国）',romaji:'kuni',cn:'國家',tag:'place'},
+  {id:'w94',lesson:'L3',jp:'かいしゃ（会社）',romaji:'kaisha',cn:'公司',tag:'place'},
+  {id:'w95',lesson:'L3',jp:'うち／いえ',romaji:'uchi / ie',cn:'家',tag:'place'},
+  {id:'w96',lesson:'L3',jp:'こうえん（公園）',romaji:'kōen',cn:'公園',tag:'place'},
+  {id:'w97',lesson:'L3',jp:'くつ（靴）',romaji:'kutsu',cn:'鞋',tag:'goods'},
+  {id:'w98',lesson:'L3',jp:'ネクタイ',romaji:'nekutai',cn:'領帶',tag:'goods'},
+  {id:'w99',lesson:'L3',jp:'ワイン',romaji:'wain',cn:'葡萄酒',tag:'goods'},
+  {id:'w100',lesson:'L3',jp:'うりば（売り場）',romaji:'uriba',cn:'賣場／櫃台',tag:'shop'},
+  {id:'w101',lesson:'L3',jp:'ちか（地下）',romaji:'chika',cn:'地下',tag:'shop'},
+  {id:'w102',lesson:'L3',jp:'～かい（～がい）',romaji:'~ kai (~ gai)',cn:'～樓',tag:'counter'},
+  {id:'w103',lesson:'L3',jp:'なんがい（何階）',romaji:'nan-gai',cn:'幾樓',tag:'counter'},
+  {id:'w104',lesson:'L3',jp:'～えん（円）',romaji:'~ en',cn:'～日圓',tag:'money'},
+  {id:'w105',lesson:'L3',jp:'いくら',romaji:'ikura',cn:'多少錢',tag:'money'},
+  {id:'w106',lesson:'L3',jp:'ひゃく／せん／まん',romaji:'hyaku / sen / man',cn:'百／千／萬',tag:'number'},
+  {id:'w107',lesson:'L3',jp:'すみません',romaji:'sumimasen',cn:'對不起／勞駕',tag:'phrase'},
+  {id:'w108',lesson:'L3',jp:'どうも',romaji:'dōmo',cn:'謝謝／好',tag:'phrase'},
+  {id:'w109',lesson:'L3',jp:'いらっしゃいませ',romaji:'irasshaimase',cn:'歡迎光臨',tag:'shop'},
+  {id:'w110',lesson:'L3',jp:'～を みせて ください',romaji:'~ o misete kudasai',cn:'請給我看一下～',tag:'shop'},
+  {id:'w111',lesson:'L3',jp:'じゃ、～を ください',romaji:'ja, ~ o kudasai',cn:'那就給我～吧',tag:'shop'},
+  {id:'w112',lesson:'L3',jp:'イタリア／スイス／フランス',romaji:'Itaria / Suisu / Furansu',cn:'義大利／瑞士／法國',tag:'place'},
+  {id:'w113',lesson:'L3',jp:'ジャカルタ／バンコク／ベルリン',romaji:'Jakaruta / Bankoku / Berurin',cn:'雅加達／曼谷／柏林',tag:'place'},
+  {id:'w114',lesson:'L3',jp:'しんおおさか（新大阪）',romaji:'Shin-Ōsaka',cn:'新大阪',tag:'place'},
+
+  // L4 Time, days, schedules
+  {id:'w115',lesson:'L4',jp:'おきます',romaji:'okimasu',cn:'起床',tag:'verb'},
+  {id:'w116',lesson:'L4',jp:'ねます',romaji:'nemasu',cn:'睡覺',tag:'verb'},
+  {id:'w117',lesson:'L4',jp:'はたらきます',romaji:'hatarakimasu',cn:'工作',tag:'verb'},
+  {id:'w118',lesson:'L4',jp:'やすみます',romaji:'yasumimasu',cn:'休息',tag:'verb'},
+  {id:'w119',lesson:'L4',jp:'べんきょうします',romaji:'benkyō shimasu',cn:'學習',tag:'verb'},
+  {id:'w120',lesson:'L4',jp:'おわります',romaji:'owarimasu',cn:'結束',tag:'verb'},
+  {id:'w121',lesson:'L4',jp:'デパート',romaji:'depāto',cn:'百貨公司',tag:'place'},
+  {id:'w122',lesson:'L4',jp:'ぎんこう（銀行）',romaji:'ginkō',cn:'銀行',tag:'place'},
+  {id:'w123',lesson:'L4',jp:'ゆうびんきょく（郵便局）',romaji:'yūbinkyoku',cn:'郵局',tag:'place'},
+  {id:'w124',lesson:'L4',jp:'としょかん（図書館）',romaji:'toshokan',cn:'圖書館',tag:'place'},
+  {id:'w125',lesson:'L4',jp:'びじゅつかん（美術館）',romaji:'bijutsukan',cn:'美術館',tag:'place'},
+  {id:'w126',lesson:'L4',jp:'いま（今）',romaji:'ima',cn:'現在',tag:'time'},
+  {id:'w127',lesson:'L4',jp:'～じ／～ふん（ぷん）／はん',romaji:'~ ji / ~ fun (pun) / han',cn:'～點／～分／半',tag:'time'},
+  {id:'w128',lesson:'L4',jp:'なんじ／なんぷん',romaji:'nanji / nanpun',cn:'幾點／幾分',tag:'time'},
+  {id:'w129',lesson:'L4',jp:'ごぜん／ごご',romaji:'gozen / gogo',cn:'上午／下午',tag:'time'},
+  {id:'w130',lesson:'L4',jp:'あさ／ひる／ばん（よる）',romaji:'asa / hiru / ban (yoru)',cn:'早晨／中午／晚上',tag:'time'},
+  {id:'w131',lesson:'L4',jp:'けさ／こんばん',romaji:'kesa / konban',cn:'今天早上／今天晚上',tag:'time'},
+  {id:'w132',lesson:'L4',jp:'おととい／きのう／きょう／あした／あさって',romaji:'ototoi / kinō / kyō / ashita / asatte',cn:'前天／昨天／今天／明天／後天',tag:'time'},
+  {id:'w133',lesson:'L4',jp:'まいあさ／まいにち／まいばん',romaji:'maiasa / mainichi / maiban',cn:'每天早上／每天／每天晚上',tag:'freq'},
+  {id:'w134',lesson:'L4',jp:'げつようび～にちようび',romaji:'getsuyōbi ~ nichiyōbi',cn:'週一～週日',tag:'day'},
+  {id:'w135',lesson:'L4',jp:'なんようび',romaji:'nan-yōbi',cn:'星期幾',tag:'day'},
+  {id:'w136',lesson:'L4',jp:'～から ～まで',romaji:'~ kara ~ made',cn:'從～到～',tag:'particle'},
+  {id:'w137',lesson:'L4',jp:'～と',romaji:'~ to',cn:'和／與',tag:'particle'},
+  {id:'w138',lesson:'L4',jp:'たいへんですね',romaji:'taihen desu ne',cn:'真辛苦啊',tag:'phrase'},
+  {id:'w139',lesson:'L4',jp:'ばんごう／なんばん',romaji:'bangō / nanban',cn:'號碼／幾號',tag:'number'},
+  {id:'w140',lesson:'L4',jp:'ニューヨーク／ペキン／ロサンゼルス／ロンドン',romaji:'Nyūyōku / Pekin / Rosanzerusu / Rondon',cn:'紐約／北京／洛杉磯／倫敦',tag:'place'},
+  {id:'w141',lesson:'L4',jp:'こうしえん（甲子園）',romaji:'Kōshien',cn:'甲子園',tag:'place'},
+  {id:'w142',lesson:'L4',jp:'おおさかじょう（大阪城）',romaji:'Ōsaka-jō',cn:'大阪城',tag:'place'},
+
+  // L5 Movement, transport, weeks/months/years, dates
+  {id:'w143',lesson:'L5',jp:'いきます',romaji:'ikimasu',cn:'去',tag:'verb'},
+  {id:'w144',lesson:'L5',jp:'きます',romaji:'kimasu',cn:'來',tag:'verb'},
+  {id:'w145',lesson:'L5',jp:'かえります',romaji:'kaerimasu',cn:'回',tag:'verb'},
+  {id:'w146',lesson:'L5',jp:'がっこう／スーパー／えき',romaji:'gakkō / sūpā / eki',cn:'學校／超市／車站',tag:'place'},
+  {id:'w147',lesson:'L5',jp:'ひこうき／ふね',romaji:'hikōki / fune',cn:'飛機／船',tag:'transport'},
+  {id:'w148',lesson:'L5',jp:'でんしゃ／ちかてつ／しんかんせん',romaji:'densha / chikatetsu / shinkansen',cn:'電車／地鐵／新幹線',tag:'transport'},
+  {id:'w149',lesson:'L5',jp:'バス／タクシー／じてんしゃ／あるいて',romaji:'basu / takushī / jitensha / aruite',cn:'公車／計程車／自行車／步行',tag:'transport'},
+  {id:'w150',lesson:'L5',jp:'ひと／ともだち／かれ／かのじょ／かぞく',romaji:'hito / tomodachi / kare / kanojo / kazoku',cn:'人／朋友／他／她／家人',tag:'people'},
+  {id:'w151',lesson:'L5',jp:'ひとりで',romaji:'hitori de',cn:'一個人',tag:'adv'},
+  {id:'w152',lesson:'L5',jp:'せんしゅう／こんしゅう／らいしゅう',romaji:'senshū / konshū / raishū',cn:'上週／本週／下週',tag:'week'},
+  {id:'w153',lesson:'L5',jp:'せんげつ／こんげつ／らいげつ',romaji:'sengetsu / kongetsu / raigetsu',cn:'上個月／這個月／下個月',tag:'month'},
+  {id:'w154',lesson:'L5',jp:'きょねん／ことし／らいねん',romaji:'kyonen / kotoshi / rainen',cn:'去年／今年／明年',tag:'year'},
+  {id:'w155',lesson:'L5',jp:'…ねん／なんねん',romaji:'... nen / nan-nen',cn:'…年／哪一年',tag:'year'},
+  {id:'w156',lesson:'L5',jp:'…がつ／なんがつ',romaji:'... gatsu / nan-gatsu',cn:'…月／幾月',tag:'month'},
+  {id:'w157',lesson:'L5',jp:'ついたち／ふつか／みっか／よっか／いつか／むいか',romaji:'tsuitachi / futsuka / mikka / yokka / itsuka / muika',cn:'1號／2號／3號／4號／5號／6號',tag:'date'},
+  {id:'w158',lesson:'L5',jp:'なのか／ようか／ここのか／とおか',romaji:'nanoka / yōka / kokonoka / tōka',cn:'7號／8號／9號／10號',tag:'date'},
+  {id:'w159',lesson:'L5',jp:'じゅうよっか／はつか／にじゅうよっか',romaji:'jūyokka / hatsuka / nijūyokka',cn:'14號／20號／24號',tag:'date'},
+  {id:'w160',lesson:'L5',jp:'…にち／なんにち／いつ',romaji:'... nichi / nan-nichi / itsu',cn:'…號／幾號／什麼時候',tag:'date'},
+  {id:'w161',lesson:'L5',jp:'たんじょうび（誕生日）',romaji:'tanjōbi',cn:'生日',tag:'date'},
+  {id:'w162',lesson:'L5',jp:'～ばんせん',romaji:'~ bansen',cn:'～號月台',tag:'train'},
+  {id:'w163',lesson:'L5',jp:'つぎの',romaji:'tsugi no',cn:'下一個',tag:'train'},
+  {id:'w164',lesson:'L5',jp:'ふつう／きゅうこう／とっきゅう',romaji:'futsū / kyūkō / tokkyū',cn:'普通／急行／特急',tag:'train'},
+  {id:'w165',lesson:'L5',jp:'そうですね／ありがとうございました',romaji:'sō desu ne / arigatō gozaimashita',cn:'是啊／非常感謝（過去）',tag:'phrase'},
+  {id:'w166',lesson:'L5',jp:'こうしえん／おおさかじょう',romaji:'Kōshien / Ōsaka-jō',cn:'甲子園／大阪城',tag:'place'},
+
+  // L6 Actions, food/drink, activities, adverbs
+  {id:'w167',lesson:'L6',jp:'たべます',romaji:'tabemasu',cn:'吃',tag:'verb'},
+  {id:'w168',lesson:'L6',jp:'のみます',romaji:'nomimasu',cn:'喝',tag:'verb'},
+  {id:'w169',lesson:'L6',jp:'みます',romaji:'mimasu',cn:'看',tag:'verb'},
+  {id:'w170',lesson:'L6',jp:'ききます',romaji:'kikimasu',cn:'聽／問',tag:'verb'},
+  {id:'w171',lesson:'L6',jp:'よみます',romaji:'yomimasu',cn:'讀',tag:'verb'},
+  {id:'w172',lesson:'L6',jp:'かきます',romaji:'kakimasu',cn:'寫',tag:'verb'},
+  {id:'w173',lesson:'L6',jp:'かいます',romaji:'kaimasu',cn:'買',tag:'verb'},
+  {id:'w174',lesson:'L6',jp:'とります（しゃしんを～）',romaji:'torimasu (shashin o ~)',cn:'拍（照）',tag:'verb'},
+  {id:'w175',lesson:'L6',jp:'します',romaji:'shimasu',cn:'做',tag:'verb'},
+  {id:'w176',lesson:'L6',jp:'あいます（ともだちに～）',romaji:'aimasu (tomodachi ni ~)',cn:'見（朋友）',tag:'verb'},
+  {id:'w177',lesson:'L6',jp:'ごはん／あさごはん／ひるごはん／ばんごはん',romaji:'gohan / asa- / hiru- / ban-gohan',cn:'飯／早餐／午餐／晚餐',tag:'food'},
+  {id:'w178',lesson:'L6',jp:'たまご／にく／さかな／やさい／くだもの',romaji:'tamago / niku / sakana / yasai / kudamono',cn:'蛋／肉／魚／蔬菜／水果',tag:'food'},
+  {id:'w179',lesson:'L6',jp:'みず／おちゃ／こうちゃ／ぎゅうにゅう／ジュース／ビール／［お］さけ',romaji:'mizu / ocha / kōcha / gyūnyū / jūsu / bīru / osake',cn:'水／綠茶／紅茶／牛奶／果汁／啤酒／酒',tag:'drink'},
+  {id:'w180',lesson:'L6',jp:'パン／ケーキ',romaji:'pan / kēki',cn:'麵包／蛋糕',tag:'food'},
+  {id:'w181',lesson:'L6',jp:'メール／レポート／しゃしん／みせ／しゅくだい／サッカー',romaji:'mēru / repōto / shashin / mise / shukudai / sakkā',cn:'郵件／報告／照片／店／作業／足球',tag:'activity'},
+  {id:'w182',lesson:'L6',jp:'いっしょに／ちょっと／いつも／ときどき／それから',romaji:'issho ni / chotto / itsumo / tokidoki / sorekara',cn:'一起／有點／總是／有時／然後',tag:'adv'},
+  {id:'w183',lesson:'L6',jp:'ええ／いいですね／わかりました',romaji:'ee / ii desu ne / wakarimashita',cn:'嗯／好啊／明白了',tag:'phrase'},
+  {id:'w184',lesson:'L6',jp:'どこで',romaji:'doko de',cn:'在哪裡（進行動作）',tag:'q'},
+  {id:'w185',lesson:'L6',jp:'なんですか／じゃ、また（あした）',romaji:'nan desu ka / ja, mata (ashita)',cn:'什麼事？／那麼，再見（明天見）',tag:'phrase'},
+  {id:'w186',lesson:'L6',jp:'キムラ／おおさかデパート／つるや／フランスや／まいにちや',romaji:'Kimura / Ōsaka depāto / Tsuruya / Furansuya / Mainichiya',cn:'木村／大阪百貨／鶴屋／法蘭屋／每日屋',tag:'proper'}
+];
+
+const PATTERNS = [
+  // L1
+  {id:'p1',lesson:'L1',title:'A は B です',jp:'わたしは 学生です。',romaji:'watashi wa gakusei desu.',cn:'我是學生。'},
+  {id:'p2',lesson:'L1',title:'否定：A は B じゃ（では）ありません',jp:'サントスさんは 学生じゃありません。',romaji:'... ja (de wa) arimasen',cn:'桑托斯不是學生。'},
+  {id:'p3',lesson:'L1',title:'疑問：…ですか',jp:'ミラーさんは 会社員ですか。',romaji:'... desu ka?',cn:'米勒是公司職員嗎？'},
+  {id:'p4',lesson:'L1',title:'也：A も B です',jp:'サントスさんも 会社員です。',romaji:'... mo ... desu',cn:'…也…'},
+  {id:'p5',lesson:'L1',title:'來自…：～から 来ました',jp:'タイから 来ました。',romaji:'tai kara kimashita',cn:'從泰國來。'},
+  // L2
+  {id:'p6',lesson:'L2',title:'指示詞（物）',jp:'これは 辞書です。／この 本は～',romaji:'kore / sore / are / dore; kono / sono / ano',cn:'這／那；這本～'},
+  {id:'p7',lesson:'L2',title:'所屬／性質の「の」',jp:'これは 日本の 車です。',romaji:'nihon no kuruma',cn:'這是日本的車。'},
+  {id:'p8',lesson:'L2',title:'「の」省略',jp:'これは わたしのです。',romaji:'watashi no desu',cn:'這是我的。'},
+  // L3
+  {id:'p9',lesson:'L3',title:'場所指示',jp:'ここ／そこ／あそこ／どこ',romaji:'koko / soko / asoko / doko',cn:'這裡／那裡／哪裡'},
+  {id:'p10',lesson:'L3',title:'場所名 + は + ここ/そこ/あそこ です',jp:'エレベーターは あそこです。',romaji:'erebētā wa asoko desu',cn:'電梯在那邊。'},
+  {id:'p11',lesson:'L3',title:'詢價',jp:'これは いくらですか。',romaji:'ikura desu ka?',cn:'這個多少錢？'},
+  // L4
+  {id:'p12',lesson:'L4',title:'時間 + に + V',jp:'6時に 起きます。',romaji:'roku-ji ni okimasu',cn:'六點起床。'},
+  {id:'p13',lesson:'L4',title:'從…到…',jp:'9時から 5時まで 働きます。',romaji:'9ji kara 5ji made hatarakimasu',cn:'從9點到5點工作。'},
+  {id:'p14',lesson:'L4',title:'動詞禮貌形',jp:'ます／ません／ました／ませんでした',romaji:'masu conjugation',cn:'非過去／否定／過去／過去否定'},
+  // L5
+  {id:'p15',lesson:'L5',title:'方向：～へ／～に',jp:'京都へ 行きます。',romaji:'kyōto e ikimasu',cn:'去京都。'},
+  {id:'p16',lesson:'L5',title:'手段：～で',jp:'タクシーで 帰ります。',romaji:'takushī de kaerimasu',cn:'乘計程車回去。'},
+  {id:'p17',lesson:'L5',title:'與…一起：～と',jp:'家族と 日本へ 来ました。',romaji:'kazoku to ... kimashita',cn:'和家人一來日本。'},
+  // L6
+  {id:'p18',lesson:'L6',title:'賓語：N を V',jp:'パンを 食べます。',romaji:'pan o tabemasu',cn:'吃麵包。'},
+  {id:'p19',lesson:'L6',title:'地點で + V',jp:'駅で 新聞を 買います。',romaji:'eki de shinbun o kaimasu',cn:'在車站買報紙。'},
+  {id:'p20',lesson:'L6',title:'邀請：～ませんか',jp:'いっしょに 行きませんか。',romaji:'issho ni ikimasen ka',cn:'一起去好嗎？'},
+  {id:'p21',lesson:'L6',title:'建議：～ましょう',jp:'休みましょう。',romaji:'yasumimashō',cn:'休息一下吧。'}
+];
+
+/* ========= STATE ========= */
+let currentTab = 'words'; // 'words' | 'patterns'
+let showRomaji = true, showChinese = true;
+let mode = 'list'; // 'list' | 'flash'
+let deck = JSON.parse(localStorage.getItem('jn_deck')||'[]'); // array of item ids
+const $ = s=>document.querySelector(s);
+
+/* ========= HELPERS ========= */
+function speak(text, lang='ja-JP'){
+  if(!('speechSynthesis' in window)){ alert('此瀏覽器不支援語音朗讀'); return;}
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang; u.rate = 1; u.pitch = 1; u.volume = 1;
+  window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+}
+function saveDeck(){ localStorage.setItem('jn_deck', JSON.stringify(deck)); }
+function lessonSelected(lesson, sel){
+  if(sel.includes('all')) return true;
+  return sel.includes(lesson);
+}
+function filterItems(list){
+  const q = $('#searchBox').value.trim().toLowerCase();
+  const sel = [...document.querySelector('#lessonFilter').selectedOptions].map(o=>o.value);
+  return list.filter(it=>{
+    if(!lessonSelected(it.lesson, sel)) return false;
+    const hay = `${it.jp} ${it.romaji||''} ${it.cn||''}`.toLowerCase();
+    return hay.includes(q);
+  });
+}
+function badgeCount(n){ document.querySelector('#countBadge').textContent = `${n} 項`; }
+
+/* ========= RENDER LIST ========= */
+function renderList(){
+  const list = currentTab==='words'? WORDS : PATTERNS;
+  const filtered = filterItems(list);
+  badgeCount(filtered.length);
+  const wrap = document.querySelector('#listView'); wrap.innerHTML='';
+  filtered.forEach(it=>{
+    const card = document.createElement('div');
+    card.className='card';
+    card.innerHTML = `
+      <div class="badge">${it.lesson}</div>
+      <div class="jp">${it.jp}</div>
+      <div class="romaji ${showRomaji?'':'hidden'}">${it.romaji||''}</div>
+      <div class="cn ${showChinese?'':'hidden'}">${it.cn||''}</div>
+      <div class="meta">${currentTab==='words'?(it.tag||''): (it.title||'')}</div>
+      <div class="row">
+        <button class="speakJP">讀日文</button>
+        <button class="speakCN">讀中文</button>
+        <button class="solid addDeck">${deck.includes(it.id)?'已在牌組':'加入牌組'}</button>
+      </div>
+    `;
+    card.querySelector('.speakJP').onclick=()=>speak(it.jp,'ja-JP');
+    card.querySelector('.speakCN').onclick=()=>speak(it.cn||it.jp,'zh-TW');
+    card.querySelector('.addDeck').onclick=()=>{
+      if(!deck.includes(it.id)) deck.push(it.id);
+      saveDeck(); renderList();
+    };
+    wrap.appendChild(card);
+  });
+}
+
+/* ========= FLASHCARDS ========= */
+let flashPool = []; let currentIndex = 0; let showBack = false;
+function buildFlashPool(){
+  const ids = deck.slice();
+  const source = [...WORDS, ...PATTERNS];
+  flashPool = source.filter(x=>ids.includes(x.id));
+  currentIndex = 0; showBack = false;
+  document.querySelector('#deckInfo').textContent = `牌組：${flashPool.length} 張 | ← Again ／ → Good | 空白鍵翻面`;
+}
+function showFlash(){
+  const jp = document.querySelector('#fcJP');
+  const rm = document.querySelector('#fcRomaji');
+  const cn = document.querySelector('#fcCN');
+  const ls = document.querySelector('#fcLesson');
+  if(flashPool.length===0){ jp.textContent='牌組為空'; rm.textContent=''; cn.textContent='點擊「把篩選結果加入牌組」'; return; }
+  const it = flashPool[currentIndex % flashPool.length];
+  ls.textContent = it.lesson; jp.textContent = it.jp;
+  rm.textContent = showBack && showRomaji ? (it.romaji||'') : ' ';
+  cn.textContent = showBack && showChinese ? (it.cn||'') : ' ';
+}
+function nextCard(){ currentIndex = (currentIndex+1)%flashPool.length; showBack=false; showFlash(); }
+
+/* ========= UI EVENTS ========= */
+document.querySelector('#tabWords').onclick=()=>{ currentTab='words'; document.querySelector('#tabWords').classList.add('active'); document.querySelector('#tabPatterns').classList.remove('active'); renderList(); };
+document.querySelector('#tabPatterns').onclick=()=>{ currentTab='patterns'; document.querySelector('#tabPatterns').classList.add('active'); document.querySelector('#tabWords').classList.remove('active'); renderList(); };
+document.querySelector('#searchBox').oninput=renderList;
+document.querySelector('#lessonFilter').onchange=renderList;
+document.querySelector('#showRomaji').onchange=(e)=>{ showRomaji=e.target.checked; renderList(); showFlash(); };
+document.querySelector('#showChinese').onchange=(e)=>{ showChinese=e.target.checked; renderList(); showFlash(); };
+document.querySelector('#modeList').onclick=()=>{ document.querySelector('#modeList').classList.add('primary'); document.querySelector('#modeFlash').classList.remove('primary'); document.querySelector('#listView').classList.remove('hidden'); document.querySelector('#flashView').classList.add('hidden'); renderList(); };
+document.querySelector('#modeFlash').onclick=()=>{ document.querySelector('#modeFlash').classList.add('primary'); document.querySelector('#modeList').classList.remove('primary'); document.querySelector('#listView').classList.add('hidden'); document.querySelector('#flashView').classList.remove('hidden'); buildFlashPool(); showFlash(); };
+document.querySelector('#btnAddFiltered').onclick=()=>{
+  const list = currentTab==='words'? WORDS : PATTERNS;
+  const filtered = filterItems(list);
+  filtered.forEach(it=>{ if(!deck.includes(it.id)) deck.push(it.id); });
+  saveDeck(); alert(`已加入 ${filtered.length} 項到牌組`); renderList();
+};
+document.querySelector('#btnClearDeck').onclick=()=>{ if(confirm('確定清空牌組？')){ deck=[]; saveDeck(); buildFlashPool(); showFlash(); renderList(); } };
+
+document.querySelector('#fcFlip').onclick=()=>{ showBack=!showBack; showFlash(); };
+document.querySelector('#fcSpeakJP').onclick=()=>{ const it=flashPool[currentIndex]; if(it) speak(it.jp,'ja-JP'); };
+document.querySelector('#fcSpeakCN').onclick=()=>{ const it=flashPool[currentIndex]; if(it) speak(it.cn||it.jp,'zh-TW'); };
+document.querySelector('#fcAgain').onclick=()=>{ const it=flashPool[currentIndex]; if(!it) return; flashPool.splice(currentIndex,1); flashPool.splice((currentIndex+2)% (flashPool.length+1),0,it); showBack=false; showFlash(); };
+document.querySelector('#fcGood').onclick=()=>{ nextCard(); };
+document.querySelector('#fcRemove').onclick=()=>{ const it=flashPool[currentIndex]; if(!it) return; deck = deck.filter(id=>id!==it.id); saveDeck(); flashPool.splice(currentIndex,1); if(currentIndex>=flashPool.length) currentIndex=0; showBack=false; showFlash(); };
+
+document.addEventListener('keydown',(e)=>{
+  if(document.querySelector('#flashView').classList.contains('hidden')) return;
+  if(e.code==='Space'){ e.preventDefault(); document.querySelector('#fcFlip').click(); }
+  if(e.key==='ArrowLeft'){ document.querySelector('#fcAgain').click(); }
+  if(e.key==='ArrowRight'){ document.querySelector('#fcGood').click(); }
+});
+
+renderList();
+</script>
+</body>
+</html>
